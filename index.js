@@ -5,13 +5,14 @@ const {PORT} = require('./config');
 const { query } = require('./DB/db');
 const authRouter = require('./routes/authRouter');
 const UserModel = require('./models/UserModel');
+const userRouter = require('./routes/userRouter');
 const user = new UserModel();
 
 app.use(bodyParser.json());
 
 
-app.use('/api/user', authRouter)
-
+app.use('/api', authRouter);
+app.use('/api/user', userRouter);
 
 app.get('/', async (req, res) => {
     try{

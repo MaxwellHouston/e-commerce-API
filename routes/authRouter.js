@@ -1,9 +1,9 @@
 const Usermodel = require('../models/UserModel');
-const { registerSchema, loginSchema } = require('../validateSchemas');
+const { registerSchema, loginSchema } = require('../functions_schemas/validateSchemas');
 const { token_secret } = require('../config');
+const { hashPassword, verifyPassword } = require('../functions_schemas/validateFunctions');
 
 const { validate, ValidationError } = require('express-validation');
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const userInstance = new Usermodel();
@@ -33,8 +33,7 @@ authRouter.post('/register', async (req, res) => {
     }
     //Hash password
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
+    const hashedPassword = await hashPassword(data.password);
     data.password = hashedPassword;
         
     //Create new user
@@ -55,13 +54,13 @@ authRouter.post('/login', async (req, res) => {
     if(user.rows.length === 0) return res.status(400).send('Email/Password not found');
 
     //Validate password
-    const validPassword = await bcrypt.compare(data.password, user.rows[0].password);
+    const validPassword = await verifyPassword(data.password, user.rows[0].password);
     if(!validPassword) return res.status(400).send('Email/Password not found');
     
     //Assign token
     const token = jwt.sign({email: data.email}, token_secret);
 
-    res.header('auth-token', token).send('Login successful');
+    res.header('login_token', token).send('Login successful');
 
 })
 
