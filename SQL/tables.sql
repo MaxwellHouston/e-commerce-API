@@ -3,7 +3,7 @@ CREATE TABLE users (
     first_name varchar(20) NOT NULL,
     last_name varchar(20) NOT NULL,
     email varchar(50) UNIQUE NOT NULL,
-    password varchar(20) NOT NULL,
+    password varchar(50) NOT NULL,
     created timestamp NOT NULL,
     modified timestamp
 );
