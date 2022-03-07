@@ -6,6 +6,7 @@ const { query } = require('./DB/db');
 const authRouter = require('./routes/authRouter');
 const UserModel = require('./models/UserModel');
 const userRouter = require('./routes/userRouter');
+const productRouter = require('./routes/productRouter');
 const user = new UserModel();
 
 app.use(bodyParser.json());
@@ -13,10 +14,11 @@ app.use(bodyParser.json());
 
 app.use('/api', authRouter);
 app.use('/api/user', userRouter);
+app.use('/api/products', productRouter);
 
 app.get('/', async (req, res) => {
     try{
-        const result = await query('SELECT * FROM users',[]);
+        const result = await query('SELECT * FROM product',[]);
         res.send(result.rows)
     } catch(err){
         res.status(400).send(err.stack)
