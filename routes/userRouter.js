@@ -53,10 +53,19 @@ userRouter.put('/update', async (req, res) => {
             }
             await userInstance.updateByEmail(input);
         } catch(err) {
-            return res.status(400).send(err);
+            res.status(400).send(err);
         }
     }
     res.send('Update successful');
+});
+
+userRouter.delete('/', async (req, res) => {
+    try {
+        await userInstance.deleteByEmail(req.email);
+    } catch(err) {
+        res.status(400).send(err)
+    }
+    res.status(204).send();
 });
 
 module.exports = userRouter;

@@ -33,6 +33,16 @@ module.exports = class Usermodel {
         }
     }
 
+    async deleteByEmail(data) {
+        let text = 'DELETE FROM users WHERE email = $1;';
+        let inputs = [data];
+        try{
+            return await query(text, inputs);
+        } catch(err) {
+            throw err.stack;
+        }
+    }
+
     
 
 }
