@@ -19,13 +19,22 @@ module.exports = {
         return checkedPassword;
     },
 
-    async verifyToken(token) {
+    async verifyTokenEmail(token) {
             const email = verify(token, token_secret).email;
             const emailCheck = await userInstance.getByEmail(email);
             if(emailCheck.rows.length === 0){
-                throw new Error('Invalid login_token')
+                throw new Error('Invalid login_token');
             }
             return email;
+    },
+
+    async verifyTokenId(token) {
+        const id = verify(token, token_secret).id;
+        const idCheck = await userInstance.getById(id);
+        if(idCheck.rows.length === 0){
+            throw new Error('Invalid login_token');
+        }
+        return id;
     }
             
 }

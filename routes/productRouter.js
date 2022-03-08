@@ -3,7 +3,7 @@ const productRouter = require('express').Router();
 
 const productInstance = new Productmodel();
 
-
+//Get all products
 productRouter.get('/', async (req, res) => {
 
     try{
@@ -14,6 +14,7 @@ productRouter.get('/', async (req, res) => {
     }
 })
 
+//Get product by id
 productRouter.get('/:id', async (req, res) => {
 
     let id = req.params.id;
@@ -27,6 +28,7 @@ productRouter.get('/:id', async (req, res) => {
     }
 })
 
+//Get products by category
 productRouter.get('/categories/:category', async (req, res) => {
     
     let category = req.params.category;

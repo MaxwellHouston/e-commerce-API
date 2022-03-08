@@ -50,7 +50,7 @@ authRouter.post('/login', async (req, res) => {
     let data = req.body;
 
     //Check for user
-    let user =await userInstance.getByEmail(data.email);
+    let user = await userInstance.getByEmail(data.email);
     if(user.rows.length === 0) return res.status(400).send('Email/Password not found');
 
     //Validate password
@@ -58,7 +58,7 @@ authRouter.post('/login', async (req, res) => {
     if(!validPassword) return res.status(400).send('Email/Password not found');
     
     //Assign token
-    const token = jwt.sign({email: data.email}, token_secret);
+    const token = jwt.sign({email: data.email, id: user.rows[0].id}, token_secret);
 
     res.header('login_token', token).send('Login successful');
 

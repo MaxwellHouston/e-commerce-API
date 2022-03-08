@@ -23,6 +23,16 @@ module.exports = class Usermodel {
         }
     }
 
+    async getById(data) {
+        let text = 'SELECT * FROM users WHERE id = $1;';
+        let inputs = [data];
+        try {
+            return await query(text, inputs);
+        } catch(err) {
+            throw err.stack;
+        }
+    }
+
     async updateByEmail(data) {
         let text = format('UPDATE users SET %I = $1 WHERE email = $2;', data.column);
         let inputs = [data.value, data.email];

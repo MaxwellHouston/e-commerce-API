@@ -24,7 +24,7 @@ module.exports = class Productmodel {
 
     async getProductsByCategory(data) {
         try{
-            const text = 'SELECT * FROM product WHERE category = $1';
+            const text = 'SELECT * FROM product WHERE category = $1;';
             const inputs = [data];
             const result = await query(text, inputs);
             return result.rows;

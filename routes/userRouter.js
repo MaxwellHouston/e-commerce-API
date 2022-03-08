@@ -1,11 +1,9 @@
 const userRouter = require('express').Router();
-const jwt = require('jsonwebtoken');
 const { validate, ValidationError } = require('express-validation');
 
-const { token_secret } = require('../config');
 const UserModel = require('../models/UserModel');
 const { updateSchema } = require('../functions_schemas/validateSchemas');
-const { hashPassword, verifyToken } = require('../functions_schemas/validateFunctions');
+const { hashPassword, verifyTokenEmail } = require('../functions_schemas/validateFunctions');
 
 
 const userInstance = new UserModel();
@@ -14,7 +12,7 @@ const userInstance = new UserModel();
 //Token Middleware
 userRouter.use(async (req, res, next) => {
     try{
-        const email = await verifyToken(req.headers.login_token);
+        const email = await verifyTokenEmail(req.headers.login_token);
         req.email = email;
         next();
         } catch(err) {
