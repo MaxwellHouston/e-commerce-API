@@ -23,11 +23,12 @@ module.exports = class Ordermodel {
         }
     }
 
-    async updateOrderStatus(data) {
-        const text = 'UPDATE orders SET status = $1 WHERE id = $1;';
-        const inputs = [data.status, data.order_id];
+    async getOrderProducts(data) {
+        const text = 'SELECT product.*, qty FROM product JOIN order_product ON id = product_id WHERE order_id = $1';
+        const inputs = [data];
         try {
-            return await query(text, inputs);
+            const products = await query(text, inputs);
+            return products.rows;
         } catch (err) {
             throw err.stack;
         }
@@ -38,9 +39,24 @@ module.exports = class Ordermodel {
         const inputs = [data];
         try {
             const orders = await query(text, inputs);
-            
+            return orders.rows;
         } catch (err) {
             throw err.stack;
         }
     }
+
+    async getOrderById(data) {
+        const text = 'SELECT * FROM orders WHERE id = $1';
+        const inputs = [data];
+        try {
+            const products = await this.getOrderProducts(data);
+            const order = await query(text, inputs);
+            if(!order.rows[0]) return order.rows[0];
+            order.rows[0].products = products;
+            return order.rows[0];
+        } catch (err) {
+            throw err.stack;
+        }
+    }
+
 }
