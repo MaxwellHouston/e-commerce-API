@@ -60,6 +60,25 @@ cartRouter.post('/', async (req, res) => {
     }
 })
 
+//Delete cart
+cartRouter.delete('/:id', async (req, res) => {
+    try{
+        await cartInstance.deleteCart(req.cart.id);
+        res.status(204).send();
+    } catch(err) {
+        res.status(400).send(err)
+    }
+})
+
+//Checkout
+cartRouter.post('/:id/checkout', async (req, res) => {
+    try {
+        const result = await cartInstance.checkout({user_id: req.userId, cart_id: req.cart.id});
+        res.json(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
 
 
 

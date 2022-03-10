@@ -1,5 +1,7 @@
 const { query } = require('../DB/db');
+const Ordermodel = require('../models/OrderModel');
 
+const orderInstance = new Ordermodel();
 
 module.exports = class Cartmodel {
 
@@ -35,6 +37,16 @@ module.exports = class Cartmodel {
         }
     }
 
+    async deleteCart(data) {
+        const text = 'DELETE FROM cart WHERE id = $1;';
+        const inputs = [data];
+        try {
+            return await query(text, inputs);
+        } catch (err) {
+            throw err.stack
+        }
+    }
+
     async addProduct(data) {
         const text = 'INSERT INTO cart_product VALUES ($1, $2, $3)';
         const inputs = [data.cart_id, data.product_id, data.qty];
@@ -65,5 +77,45 @@ module.exports = class Cartmodel {
         } catch(err) {
             throw err.stack;
         }
+    }
+
+    async updateProductQty(data) {
+        const text = 'UPDATE cart_product SET qty = $1 WHERE cart_id = $2 AND product_id = $3;';
+        const inputs = [data.qty, data.cart_id, data.product_id];
+        try {
+            return await query(text, inputs);
+        } catch (err) {
+            throw err.stack;
+        }
+    }
+
+    async deleteProductById(data) {
+        const text = 'DELETE FROM cart_product WHERE cart_id = $1 AND product_id = $2;';
+        const inputs = [data.cart_id, data.product_id];
+        try {
+            return await query(text, inputs);
+        } catch (err) {
+            throw err.stack;
+        }
+    }
+
+    async checkout(data) {
+        try {
+            const newOrder = await orderInstance.create(data.user_id);
+            const orderId = newOrder.rows[0].id;
+            const products = await this.getAllProducts(data.cart_id);
+            for(const item of products){
+                let data = {
+                    order_id: orderId,
+                    product_id: item.id,
+                    qty: item.qty
+                }
+                await orderInstance.addProduct(data);
+            }
+            return true
+        } catch (err) {
+            throw err;
+        }
+        
     }
 }

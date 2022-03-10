@@ -8,9 +8,15 @@ const cartInstance = new CartModel();
 
 //Add product to cart
 productCartRouter.post('/', async (req, res) => {
+    const data = {
+        cart_id: req.cart.id,
+        product_id: req.body.product_id,
+        qty: req.body.qty
+    }
+
      try {
-         const result = await cartInstance.addProduct(req.body);
-         res.json(result)
+         await cartInstance.addProduct(data);
+         res.send('Product added')
      } catch(err) {
         res.status(400).send(err);
      }
@@ -34,6 +40,29 @@ productCartRouter.get('/:id', async (req, res) => {
         const result = await cartInstance.getProductById(data);
         if(!result) return res.status(400).send('Product not found');
         res.json(result);
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+//Update qty in cart
+productCartRouter.put('/:id', async (req, res) => {
+    const data = {qty: req.body.qty, cart_id: req.cart.id, product_id: req.params.id};
+    try {
+        await cartInstance.updateProductQty(data);
+        res.send('Quantity updated');
+    } catch (err) {
+        res.status(400).send(err);
+    }
+})
+
+
+//Delete product in cart
+productCartRouter.delete('/:id', async (req, res) => {
+    const data = {cart_id: req.cart.id, product_id: req.params.id};
+    try {
+        await cartInstance.deleteProductById(data);
+        res.status(204).send();
     } catch (err) {
         res.status(400).send(err);
     }
