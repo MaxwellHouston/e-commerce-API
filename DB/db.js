@@ -1,15 +1,21 @@
 const Pool = require('pg').Pool;
-const {dbLogin} = require('../config');
+const {dbLogin, database_url, node_env} = require('../config');
 
-const pool = new Pool(
-    {
-        user: dbLogin.user,
-        host: dbLogin.host,
-        database: dbLogin.database,
-        password: dbLogin.password,
-        port: dbLogin.port
-    }
-)
+
+const localConfig = {
+    user: dbLogin.user,
+    host: dbLogin.host,
+    database: dbLogin.database,
+    password: dbLogin.password,
+    port: dbLogin.port
+}
+
+const herokuConfig = {
+    connectionString: database_url
+}
+
+
+const pool = new Pool(node_env === 'production' ? herokuConfig : localConfig);
 
 
 module.exports = {
