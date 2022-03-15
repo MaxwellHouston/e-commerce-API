@@ -10,9 +10,8 @@ const localConfig = {
     port: dbLogin.port
 }
 
-const herokuConfig = {
-    connectionString: database_url
-}
+const herokuConfig = database_url;
+
 
 
 const pool = new Pool(node_env === 'production' ? herokuConfig : localConfig);
