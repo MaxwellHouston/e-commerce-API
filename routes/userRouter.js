@@ -21,7 +21,7 @@ userRouter.use(async (req, res, next) => {
 })
 
 // Input validation
-userRouter.use('/update', validate(updateSchema), (err, req, res, next) => {
+userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
     if(err instanceof ValidationError) return res.status(err.statusCode).json(err);
     next();
 })    
@@ -30,8 +30,7 @@ userRouter.use('/update', validate(updateSchema), (err, req, res, next) => {
 // Routes
 userRouter.get('/', async (req, res) => {
     try {
-        const userFetch = await userInstance.getByEmail(req.email);
-        const user = userFetch.rows[0];
+        const user = await userInstance.getByEmail(req.email);
         user.password = '********';
         res.send(user);
     } catch(err) {
@@ -39,7 +38,7 @@ userRouter.get('/', async (req, res) => {
     }
 });
 
-userRouter.put('/update', async (req, res) => {
+userRouter.put('/', async (req, res) => {
     const data = req.body;
 
     for(const key in data){
@@ -54,7 +53,7 @@ userRouter.put('/update', async (req, res) => {
             res.status(400).send(err);
         }
     }
-    res.send('Update successful');
+    res.send('Update successful, remember to login again if email changed');
 });
 
 userRouter.delete('/', async (req, res) => {

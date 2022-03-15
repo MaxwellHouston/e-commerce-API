@@ -1,13 +1,12 @@
 const productCartRouter = require('express').Router({mergeParams: true});
+const { validate, ValidationError } = require('express-validation');
+const { productInputSchema, productQtySchema } = require('../functions_schemas/productSchema');
 const CartModel = require('../models/CartModel');
 
 const cartInstance = new CartModel();
 
-
-
-
 //Add product to cart
-productCartRouter.post('/', async (req, res) => {
+productCartRouter.post('/', validate(productInputSchema), async (req, res) => {
     const data = {
         cart_id: req.cart.id,
         product_id: req.body.product_id,
@@ -26,7 +25,7 @@ productCartRouter.post('/', async (req, res) => {
 productCartRouter.get('/', async (req, res) => {
     try{
         const result = await cartInstance.getAllProducts(req.cart.id);
-        if(result.length === 0) return res.send('Cart Empty');
+        if(result.length === 0) return res.status(400).send('Cart Empty');
         res.json(result);
     } catch(err) {
         res.status(400).send(err);
@@ -46,11 +45,13 @@ productCartRouter.get('/:id', async (req, res) => {
 })
 
 //Update qty in cart
-productCartRouter.put('/:id', async (req, res) => {
+productCartRouter.put('/:id', validate(productQtySchema), async (req, res) => {
+    //If qty = 0 return
     const data = {qty: req.body.qty, cart_id: req.cart.id, product_id: req.params.id};
     try {
-        await cartInstance.updateProductQty(data);
-        res.send('Quantity updated');
+        const result = await cartInstance.updateProductQty(data);
+        if(result.rowCount === 0) return res.status(400).send('Product not found');
+        res.send('Qty updated');
     } catch (err) {
         res.status(400).send(err);
     }
@@ -67,5 +68,11 @@ productCartRouter.delete('/:id', async (req, res) => {
         res.status(400).send(err);
     }
 })
+
+//Catch validation errors
+productCartRouter.use((err, req, res, next) => {
+    if(err instanceof ValidationError) return res.status(err.statusCode).json(err);
+    next();
+});
 
 module.exports = productCartRouter;

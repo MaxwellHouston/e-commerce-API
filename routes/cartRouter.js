@@ -5,7 +5,7 @@ const productCartRouter = require('./productCartRouter');
 
 const cartInstance = new Cartmodel();
 
-//Validation Middleware
+//Login token check Middleware
 cartRouter.use('/', async (req, res, next) => {
     try {
         const id = await verifyTokenId(req.headers.login_token);
@@ -21,7 +21,7 @@ cartRouter.use('/:id', async (req, res, next) => {
     try{
         const cart = await cartInstance.getCartById(req.params.id);
         if(!cart) return res.status(400).send('No cart found');
-        if(cart.user_id !== req.userId) return res.status(400).send('Cannot access another users carts');
+        if(cart.user_id !== req.userId) return res.status(400).send('No cart found');
         req.cart = cart;
         next();
     } catch(err) {
@@ -72,20 +72,15 @@ cartRouter.delete('/:id', async (req, res) => {
 
 //Checkout
 cartRouter.post('/:id/checkout', async (req, res) => {
+    const cardInfo = req.body.card;
+    
     try {
         const result = await cartInstance.checkout({user_id: req.userId, cart_id: req.cart.id});
-        res.json(result);
+        if(!result) return res.status(400).send('Cart empty. No order created');
+        res.json({"order_id": result});
     } catch (err) {
         res.status(400).send(err);
     }
 })
-
-
-
-
-
-
-
-
 
 module.exports = cartRouter;

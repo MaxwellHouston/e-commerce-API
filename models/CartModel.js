@@ -101,9 +101,10 @@ module.exports = class Cartmodel {
 
     async checkout(data) {
         try {
+            const products = await this.getAllProducts(data.cart_id);
+            if(products.length === 0) return null;
             const newOrder = await orderInstance.create(data.user_id);
             const orderId = newOrder.rows[0].id;
-            const products = await this.getAllProducts(data.cart_id);
             for(const item of products){
                 let data = {
                     order_id: orderId,
@@ -112,7 +113,7 @@ module.exports = class Cartmodel {
                 }
                 await orderInstance.addProduct(data);
             }
-            return true
+            return orderId;
         } catch (err) {
             throw err;
         }

@@ -22,7 +22,7 @@ module.exports = {
     async verifyTokenEmail(token) {
             const email = verify(token, token_secret).email;
             const emailCheck = await userInstance.getByEmail(email);
-            if(emailCheck.rows.length === 0){
+            if(!emailCheck){
                 throw new Error('Invalid login_token');
             }
             return email;
@@ -31,10 +31,14 @@ module.exports = {
     async verifyTokenId(token) {
         const id = verify(token, token_secret).id;
         const idCheck = await userInstance.getById(id);
-        if(idCheck.rows.length === 0){
+        if(!idCheck){
             throw new Error('Invalid login_token');
         }
         return id;
+    },
+
+    async validateCard(data) {
+        
     }
             
 }

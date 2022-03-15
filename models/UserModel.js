@@ -17,7 +17,8 @@ module.exports = class Usermodel {
         let text = 'SELECT * FROM users WHERE email = $1;';
         let inputs = [data];
         try {
-            return await query(text, inputs);
+            const result = await query(text, inputs);
+            return result.rows[0];
         } catch (err) {
             throw err.stack;
         }
@@ -27,7 +28,8 @@ module.exports = class Usermodel {
         let text = 'SELECT * FROM users WHERE id = $1;';
         let inputs = [data];
         try {
-            return await query(text, inputs);
+            const result = await query(text, inputs);
+            return result.rows[0];
         } catch(err) {
             throw err.stack;
         }

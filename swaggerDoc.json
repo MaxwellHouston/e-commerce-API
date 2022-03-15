@@ -1,0 +1,1197 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Max's Sporting Goods API",
+    "version": "1.0.0",
+    "description": "A mock e-commerce api made for user, cart, and order transactions for a sporting goods store."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Main server"
+    }
+  ],
+  "paths": {
+    "/api/products": {
+      "get": {
+        "summary": "Returns all products.",
+        "description": "Gets all products from store database and returns them in order of id.",
+        "operationId": "get_products",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "All product objects returned in an array.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "Baseball",
+                    "price": "$1.00",
+                    "category": "baseball",
+                    "description": "Single baseball. Great for playing catch."
+                  },
+                  {
+                    "id": 2,
+                    "name": "Baseball Bat",
+                    "price": "$15.00",
+                    "category": "baseball",
+                    "description": "Wooden bat for that old school feel."
+                  },
+                  "..."
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{productId}": {
+      "get": {
+        "summary": "Get product object by product id.",
+        "description": "Using id parameter, product object is fetched from database.",
+        "operationId": "get_product_id",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "The id of the product.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns product with id matching the id parameter.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 6,
+                  "name": "Shin Guards",
+                  "price": "$5.00",
+                  "category": "soccer",
+                  "description": "Protect your shins!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error for inavlid product id.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Invalid product number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/categories/{category}": {
+      "get": {
+        "summary": "Get products in specified category.",
+        "description": "fetches all products in a category using the category parameter.",
+        "operationId": "get_products_categories",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "description": "category of products",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all product objects in the selected category, in an array.",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": 1,
+                    "name": "Baseball",
+                    "price": "$1.00",
+                    "category": "baseball",
+                    "description": "Single baseball. Great for playing catch."
+                  },
+                  {
+                    "id": 2,
+                    "name": "Baseball Bat",
+                    "price": "$15.00",
+                    "category": "baseball",
+                    "description": "Wooden bat for that old school feel."
+                  },
+                  "..."
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Error for inavlid product category.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Invalid category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "summary": "Input user data to register.",
+      "description": "This path is for creating an account to add items to your cart and make purchases.",
+      "post": {
+        "summary": "Creates an account for a new user.",
+        "description": "Creates an account for a new user.",
+        "operationId": "post_register",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "description": "Object for creating new user. Password must be at least 6 characters long. Email must match email syntax.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              },
+              "example": {
+                "first_name": "Example",
+                "last_name": "User",
+                "email": "exampl@email.com",
+                "password": "secret_password"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "text/plain": {
+                "example": "User created"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid entries in request body",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Email already in use"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "summary": "Login to your account.",
+      "description": "This path is for loging in to your account to access account functions.",
+      "post": {
+        "summary": "Login to your account.",
+        "description": "Enter your email and password to gain a jwt token that allows access to your user info, cart, and orders.",
+        "operationId": "post_login",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "description": "Object for logging into account. Password must be at least 6 characters long. Email must match email syntax.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              },
+              "example": {
+                "email": "exampl@email.com",
+                "password": "secret_password"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login token is sent back in header, under login_token",
+            "headers": {
+              "login_token": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "JWT token code that you can attach to your headers for access to your account functions."
+              }
+            },
+            "content": {
+              "text/plain": {
+                "example": "Login successful"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid entries in request body.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Email/Password not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user": {
+      "summary": "Access user account.",
+      "description": "Path for accessing and updating user account information.",
+      "get": {
+        "summary": "Get user account information.",
+        "description": "Fetches user account information based on login token provided. Password not shown with info.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_user",
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "Object containing user info based on login token sent in header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": 34,
+                  "first_name": "Example",
+                  "last_name": "user",
+                  "email": "exampl@email.com",
+                  "password": "********",
+                  "created": "2022-03-10T20:52:21.278Z",
+                  "modified": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update account information.",
+        "description": "Update account information based on login token provided.\nIMPORTANT if updating email you must login again after update for the proper token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "put_user",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "description": "Update user data by sending data you want changed in key value pairs.\nYou can send one or many updates in the same request body.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              },
+              "examples": {
+                "name change": {
+                  "value": {
+                    "first_name": "New",
+                    "last_name": "Name"
+                  }
+                },
+                "email change": {
+                  "value": {
+                    "email": "newemail@gmail.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update response",
+            "content": {
+              "text/plain": {
+                "example": "Update successful, remember to login again if email changed"
+              }
+            }
+          },
+          "400": {
+            "description": "Information entered does not fit schema.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Invalid entries"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes user account",
+        "description": "Deletes your account from the database based on login token provided. Make sure you want to delete because there is no recovery proccess.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "delete_user",
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "204": {
+            "description": "No content - Delete successful"
+          }
+        }
+      }
+    },
+    "/api/carts": {
+      "description": "Access users carts",
+      "get": {
+        "summary": "Get user cart information.",
+        "description": "Fetches user cart information. Fetches multiple carts if user has multiple carts. Uses user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_carts",
+        "tags": [
+          "Cart"
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns array of user's cart objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Carts"
+                },
+                "example": [
+                  {
+                    "id": 7,
+                    "user_id": 67,
+                    "created": "2022-03-10T21:02:57.840Z",
+                    "modified": null
+                  },
+                  {
+                    "id": 6,
+                    "user_id": 67,
+                    "created": "2022-03-10T21:02:01.460Z",
+                    "modified": "2022-03-10T21:08:23.713Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "No carts under your user id",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "No carts found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a new cart.",
+        "description": "Creates a new cart using the user id provided by the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "post_carts",
+        "tags": [
+          "Cart"
+        ],
+        "responses": {
+          "201": {
+            "description": "Cart created",
+            "content": {
+              "text/plain": {
+                "example": "User created"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/carts/{cartId}": {
+      "description": "Preform CRUD operations on a cart based on cart id from parameters and user id from the login token.",
+      "get": {
+        "summary": "Get cart by cart id.",
+        "description": "Fetches user cart information based on cart id and the user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_carts_id",
+        "tags": [
+          "Cart"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns cart object matching cart id provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                },
+                "example": {
+                  "id": 7,
+                  "user_id": 67,
+                  "created": "2022-03-10T21:02:57.840Z",
+                  "modified": null
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid cart id.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Invalid cart id"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete cart by cart id.",
+        "description": "Delete cart based on cart id from the parameters and user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "delete_carts_id",
+        "tags": [
+          "Cart"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content - cart deleted"
+          }
+        }
+      }
+    },
+    "/api/carts/{cartId}/checkout": {
+      "post": {
+        "summary": "Submit cart for checkout",
+        "description": "Creates a new order using all products in the selected cart (parameters) and the user id provided by the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "post_carts_checkout",
+        "tags": [
+          "Cart/Checkout"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns id of the new order that was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Checkout"
+                },
+                "example": {
+                  "order_id": 54
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No items in cart",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Cart empty. No order created"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/carts/{cartId}/items": {
+      "get": {
+        "summary": "Gets all items in cart",
+        "description": "Fetches all items in the selected cart (cart id from parameter and user id from login token).\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_cart_items",
+        "tags": [
+          "Cart/Items"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All product objects in cart returned in an array.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductAllCart"
+                },
+                "example": [
+                  {
+                    "id": "10,",
+                    "name": "Tennis Ball",
+                    "price": "$1.00",
+                    "category": "tennis",
+                    "description": "Loved by dogs and people alike.",
+                    "qty": 1
+                  },
+                  {
+                    "id": "27,",
+                    "name": "Hockey Stick",
+                    "price": "$20.00",
+                    "category": "hockey",
+                    "description": "Curved stick for playing ice hockey.",
+                    "qty": 2
+                  },
+                  "..."
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "No items in cart",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Cart Empty"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add item to cart",
+        "description": "Add item to the selected cart (cart id from parameter and user id from login token).\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "post_cart_items",
+        "tags": [
+          "Cart/Items"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Submit product id and qty in request body.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductAdd"
+              },
+              "example": {
+                "product_id": 30,
+                "qty": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item added to cart",
+            "content": {
+              "text/plain": {
+                "example": "Product added"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid product id",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Invalid product Id"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/carts/{cartId}/items/{itemId}": {
+      "get": {
+        "summary": "Get item in cart by item id",
+        "description": "Fetch item from the selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_cart_item_id",
+        "tags": [
+          "Cart/Items"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "Product id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns product object that matched input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSingleCart"
+                },
+                "example": {
+                  "id": "10,",
+                  "name": "Tennis Ball",
+                  "price": "$1.00",
+                  "category": "tennis",
+                  "description": "Loved by dogs and people alike.",
+                  "qty": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Product with selected id not in cart",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Product not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update item quantity in cart",
+        "description": "Update item quantity in selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "put_cart_item_id",
+        "tags": [
+          "Cart/Items"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "Product id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Submit updated qty in request body.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQty"
+              },
+              "example": {
+                "qty": 5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quantity updated successfully",
+            "content": {
+              "text/plain": {
+                "example": "Qty updated"
+              }
+            }
+          },
+          "400": {
+            "description": "Product with selected id not in cart",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Product not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Removes item from cart",
+        "description": "Removes item from selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "delete_cart_item_id",
+        "tags": [
+          "Cart/Items"
+        ],
+        "parameters": [
+          {
+            "name": "cartId",
+            "in": "path",
+            "description": "Cart id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "description": "Product id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content - Delete successful"
+          }
+        }
+      }
+    },
+    "/api/orders": {
+      "get": {
+        "summary": "Get all orders.",
+        "description": "Fetches all orders for your account. User id for fetching accounts is from your login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_orders",
+        "tags": [
+          "Orders"
+        ],
+        "responses": {
+          "200": {
+            "description": "All order objects sent in an array.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdersAll"
+                },
+                "example": [
+                  {
+                    "id": 12,
+                    "user_id": 67,
+                    "total_price": "$41.00",
+                    "status": "SHIPPED",
+                    "created": "2022-03-10T21:16:54.502Z",
+                    "modified": "2022-03-10T21:16:54.515Z"
+                  },
+                  {
+                    "id": 13,
+                    "user_id": 67,
+                    "total_price": "$100.00",
+                    "status": "PENDING",
+                    "created": "2022-03-10T21:19:56.294Z",
+                    "modified": "2022-03-10T21:20:43.543Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "No orders found.",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "No orders found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{orderId}": {
+      "get": {
+        "summary": "Get order by order id.",
+        "description": "Fetches an order from your account (user id from login token) that matches the order id provided (parameters).\nProducts in order are attached in an array to the order object.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "operationId": "get_orders_id",
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "Order id.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns order object with id matching the parameters. Products in order are attatched in array.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                },
+                "example": {
+                  "id": 13,
+                  "user_id": 67,
+                  "total_price": "$100.00",
+                  "status": "PENDING",
+                  "created": "2022-03-10T21:19:56.294Z",
+                  "modified": "2022-03-10T21:20:43.543Z",
+                  "products": [
+                    {
+                      "id": "10,",
+                      "name": "Tennis Ball",
+                      "price": "$1.00",
+                      "category": "tennis",
+                      "description": "Loved by dogs and people alike.",
+                      "qty": 1
+                    },
+                    "..."
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Order with that id not found",
+            "content": {
+              "text/plain": {
+                "examples": {
+                  "Error": {
+                    "value": "Order not found"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Registration": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string"
+          }
+        }
+      },
+      "Carts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "user_id": {
+              "type": "integer"
+            },
+            "created": {
+              "type": "string"
+            },
+            "modified": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "created": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string"
+          }
+        }
+      },
+      "Checkout": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductAllCart": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "price": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "qty": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "ProductAdd": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "integer"
+          },
+          "qty": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductSingleCart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "integer"
+          }
+        }
+      },
+      "UpdateQty": {
+        "type": "object",
+        "properties": {
+          "qty": {
+            "type": "integer"
+          }
+        }
+      },
+      "OrdersAll": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "user_id": {
+              "type": "integer"
+            },
+            "total_price": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "created": {
+              "type": "string"
+            },
+            "modified": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "total_price": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "price": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "qty": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
