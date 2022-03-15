@@ -1,5 +1,6 @@
 const { query } = require('../DB/db');
 const Ordermodel = require('../models/OrderModel');
+const processPayment = require('../functions_schemas/paymentFunctions');
 
 const orderInstance = new Ordermodel();
 
@@ -102,7 +103,9 @@ module.exports = class Cartmodel {
     async checkout(data) {
         try {
             const products = await this.getAllProducts(data.cart_id);
-            if(products.length === 0) return null;
+            if(products.length === 0) return 1;
+            const paid = processPayment();
+            if(!paid) return 2;
             const newOrder = await orderInstance.create(data.user_id);
             const orderId = newOrder.rows[0].id;
             for(const item of products){

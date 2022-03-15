@@ -76,7 +76,8 @@ cartRouter.post('/:id/checkout', async (req, res) => {
     
     try {
         const result = await cartInstance.checkout({user_id: req.userId, cart_id: req.cart.id});
-        if(!result) return res.status(400).send('Cart empty. No order created');
+        if(result === 1) return res.status(400).send('Cart empty. No order created');
+        if(result === 2) return res.status(400).send('Payment not processed');
         res.json({"order_id": result});
     } catch (err) {
         res.status(400).send(err);
