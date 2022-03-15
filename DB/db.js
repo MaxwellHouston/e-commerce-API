@@ -10,8 +10,12 @@ const localConfig = {
     port: dbLogin.port
 }
 
-const herokuConfig = database_url;
-
+const herokuConfig = {
+    connectionString: database_url,
+    ssl: {
+        rejectUnauthorized: false
+    }
+}
 
 
 const pool = new Pool(node_env === 'production' ? herokuConfig : localConfig);
