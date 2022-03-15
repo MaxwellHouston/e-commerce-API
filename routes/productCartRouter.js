@@ -46,7 +46,6 @@ productCartRouter.get('/:id', async (req, res) => {
 
 //Update qty in cart
 productCartRouter.put('/:id', validate(productQtySchema), async (req, res) => {
-    //If qty = 0 return
     const data = {qty: req.body.qty, cart_id: req.cart.id, product_id: req.params.id};
     try {
         const result = await cartInstance.updateProductQty(data);
