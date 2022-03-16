@@ -23,6 +23,9 @@ app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
 app.use('/api/orders', orderRouter);
 
+app.get('/', (req, res) => {
+    res.redirect('/api-docs');
+})
 
 app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`)
