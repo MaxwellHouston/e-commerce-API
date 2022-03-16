@@ -103,9 +103,9 @@ module.exports = class Cartmodel {
     async checkout(data) {
         try {
             const products = await this.getAllProducts(data.cart_id);
-            if(products.length === 0) return 1;
+            if(products.length === 0) return 'empty';
             const paid = processPayment();
-            if(!paid) return 2;
+            if(!paid) return 'payment';
             const newOrder = await orderInstance.create(data.user_id);
             const orderId = newOrder.rows[0].id;
             for(const item of products){
