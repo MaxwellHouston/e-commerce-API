@@ -39,7 +39,7 @@ userRouter.put('/', checkAuthentication, async (req, res) => {
             res.status(400).send(err);
         }
     }
-    res.send('Update successful, remember to login again if email changed');
+    res.send('Update successful');
 });
 
 userRouter.delete('/', checkAuthentication, async (req, res) => {

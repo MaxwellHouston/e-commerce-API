@@ -211,7 +211,7 @@
       "description": "This path is for loging in to your account to access account functions.",
       "post": {
         "summary": "Login to your account.",
-        "description": "Enter your email and password to gain a jwt token that allows access to your user info, cart, and orders.",
+        "description": "Enter your email and password to login with Passport and access your user info, cart, and orders. Passport starts a session and keeps you logged in until you send a GET request to /api/logout.",
         "operationId": "post_login",
         "tags": [
           "Authentication"
@@ -232,15 +232,7 @@
         },
         "responses": {
           "200": {
-            "description": "Login token is sent back in header, under login_token",
-            "headers": {
-              "login_token": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "JWT token code that you can attach to your headers for access to your account functions."
-              }
-            },
+            "description": "User is logged in.",
             "content": {
               "text/plain": {
                 "example": "Login successful"
@@ -262,19 +254,41 @@
         }
       }
     },
+    "/api/logout": {
+      "summary": "Logs user out.",
+      "description": "This path is for logging a user out and ending the session.",
+      "get": {
+        "summary": "Logs user out",
+        "description": "This path is for logging a user out and ending the session.",
+        "operationId": "get_logout",
+        "tags": [
+          "Authentication"
+        ],
+        "responses": {
+          "200": {
+            "description": "User is logged out, ending the session.",
+            "content": {
+              "text/plain": {
+                "example": "Logout Successful"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user": {
       "summary": "Access user account.",
       "description": "Path for accessing and updating user account information.",
       "get": {
         "summary": "Get user account information.",
-        "description": "Fetches user account information based on login token provided. Password not shown with info.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches user account information if logged in with Passport. Password not shown with info.",
         "operationId": "get_user",
         "tags": [
           "User"
         ],
         "responses": {
           "200": {
-            "description": "Object containing user info based on login token sent in header.",
+            "description": "Object containing user info.",
             "content": {
               "application/json": {
                 "schema": {
@@ -296,7 +310,7 @@
       },
       "put": {
         "summary": "Update account information.",
-        "description": "Update account information based on login token provided.\nIMPORTANT if updating email you must login again after update for the proper token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Update account information if logged in with Passport.",
         "operationId": "put_user",
         "tags": [
           "User"
@@ -329,7 +343,7 @@
             "description": "Successful update response",
             "content": {
               "text/plain": {
-                "example": "Update successful, remember to login again if email changed"
+                "example": "Update successful"
               }
             }
           },
@@ -349,7 +363,7 @@
       },
       "delete": {
         "summary": "Deletes user account",
-        "description": "Deletes your account from the database based on login token provided. Make sure you want to delete because there is no recovery proccess.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Deletes your account from the database. Make sure you want to delete because there is no recovery proccess.",
         "operationId": "delete_user",
         "tags": [
           "User"
@@ -365,7 +379,7 @@
       "description": "Access users carts",
       "get": {
         "summary": "Get user cart information.",
-        "description": "Fetches user cart information. Fetches multiple carts if user has multiple carts. Uses user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches user cart information. Fetches multiple carts if user has multiple carts. Uses user id from passport Loggin.",
         "operationId": "get_carts",
         "tags": [
           "Cart"
@@ -411,7 +425,7 @@
       },
       "post": {
         "summary": "Creates a new cart.",
-        "description": "Creates a new cart using the user id provided by the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Creates a new cart using the user id provided by your Passport loggin.",
         "operationId": "post_carts",
         "tags": [
           "Cart"
@@ -429,10 +443,10 @@
       }
     },
     "/api/carts/{cartId}": {
-      "description": "Preform CRUD operations on a cart based on cart id from parameters and user id from the login token.",
+      "description": "Preform CRUD operations on a cart based on cart id from parameters and user id provided by your Passport loggin.",
       "get": {
         "summary": "Get cart by cart id.",
-        "description": "Fetches user cart information based on cart id and the user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches user cart information based on cart id and the user id provided by your Passport loggin.",
         "operationId": "get_carts_id",
         "tags": [
           "Cart"
@@ -481,7 +495,7 @@
       },
       "delete": {
         "summary": "Delete cart by cart id.",
-        "description": "Delete cart based on cart id from the parameters and user id from the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Delete cart based on cart id from the parameters and user id provided by your Passport loggin.",
         "operationId": "delete_carts_id",
         "tags": [
           "Cart"
@@ -505,10 +519,10 @@
       }
     },
     "/api/carts/{cartId}/checkout": {
-      "post": {
+      "get": {
         "summary": "Submit cart for checkout",
-        "description": "Creates a new order using all products in the selected cart (parameters) and the user id provided by the login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
-        "operationId": "post_carts_checkout",
+        "description": "Creates a new order using all products in the selected cart (parameters) and the user id provided by your Passport loggin.",
+        "operationId": "get_carts_checkout",
         "tags": [
           "Cart/Checkout"
         ],
@@ -555,7 +569,7 @@
     "/api/carts/{cartId}/items": {
       "get": {
         "summary": "Gets all items in cart",
-        "description": "Fetches all items in the selected cart (cart id from parameter and user id from login token).\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches all items in the selected cart (cart id from parameter and user id provided by your Passport loggin).",
         "operationId": "get_cart_items",
         "tags": [
           "Cart/Items"
@@ -617,7 +631,7 @@
       },
       "post": {
         "summary": "Add item to cart",
-        "description": "Add item to the selected cart (cart id from parameter and user id from login token).\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Add item to the selected cart (cart id from parameter and user id provided by your Passport loggin).",
         "operationId": "post_cart_items",
         "tags": [
           "Cart/Items"
@@ -675,7 +689,7 @@
     "/api/carts/{cartId}/items/{itemId}": {
       "get": {
         "summary": "Get item in cart by item id",
-        "description": "Fetch item from the selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetch item from the selected cart (cart id from parameter and user id provided by your Passport loggin) by item id.",
         "operationId": "get_cart_item_id",
         "tags": [
           "Cart/Items"
@@ -735,7 +749,7 @@
       },
       "put": {
         "summary": "Update item quantity in cart",
-        "description": "Update item quantity in selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Update item quantity in selected cart (cart id from parameter and user id provided by your Passport loggin.) by item id.",
         "operationId": "put_cart_item_id",
         "tags": [
           "Cart/Items"
@@ -799,7 +813,7 @@
       },
       "delete": {
         "summary": "Removes item from cart",
-        "description": "Removes item from selected cart (cart id from parameter and user id from login token) by item id.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Removes item from selected cart (cart id from parameter and user id provided by your Passport loggin) by item id.",
         "operationId": "delete_cart_item_id",
         "tags": [
           "Cart/Items"
@@ -834,7 +848,7 @@
     "/api/orders": {
       "get": {
         "summary": "Get all orders.",
-        "description": "Fetches all orders for your account. User id for fetching accounts is from your login token.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches all orders for your account. User id for fetching accounts is provided by your Passport loggin.",
         "operationId": "get_orders",
         "tags": [
           "Orders"
@@ -886,7 +900,7 @@
     "/api/orders/{orderId}": {
       "get": {
         "summary": "Get order by order id.",
-        "description": "Fetches an order from your account (user id from login token) that matches the order id provided (parameters).\nProducts in order are attached in an array to the order object.\n* Must have proper JWT from login to access your account.\n* Send token in headers under login_token.\n* Header:  login_token:  EXAMPLEJWTTOKEN",
+        "description": "Fetches an order from your account (user id provided by your Passport loggin) that matches the order id provided (parameters).\nProducts in order are attached in an array to the order object.",
         "operationId": "get_orders_id",
         "tags": [
           "Orders"
