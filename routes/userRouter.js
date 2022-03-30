@@ -4,7 +4,7 @@ const { validate, ValidationError } = require('express-validation');
 const UserModel = require('../models/UserModel');
 const { updateSchema } = require('../functions_schemas/validateSchemas');
 const { hashPassword, verifyTokenEmail } = require('../functions_schemas/validateFunctions');
-
+const { checkAuthentication } = require('../passportConfig');
 
 const userInstance = new UserModel();
 
@@ -28,7 +28,7 @@ userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
 
 
 // Routes
-userRouter.get('/', async (req, res) => {
+userRouter.get('/', checkAuthentication, async (req, res) => {
     try {
         //const user = await userInstance.getByEmail(req.email);
         //user.password = '********';
@@ -38,7 +38,7 @@ userRouter.get('/', async (req, res) => {
     }
 });
 
-userRouter.put('/', async (req, res) => {
+userRouter.put('/', checkAuthentication, async (req, res) => {
     const data = req.body;
 
     for(const key in data){
@@ -56,7 +56,7 @@ userRouter.put('/', async (req, res) => {
     res.send('Update successful, remember to login again if email changed');
 });
 
-userRouter.delete('/', async (req, res) => {
+userRouter.delete('/', checkAuthentication, async (req, res) => {
     try {
         await userInstance.deleteByEmail(req.user.email);
     } catch(err) {

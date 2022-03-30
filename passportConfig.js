@@ -19,8 +19,15 @@ const loadPassport = (passport) => {
     passport.serializeUser((user, done) => done(null, user.id));
     passport.deserializeUser( async (id, done) => {
         const user = await userInstance.getById(id);
+        user.password = '******';
         return done(null, user);
     })
 }
 
-module.exports = loadPassport;
+const checkAuthentication = (req, res, next) => {
+    console.log(req.isAuthenticated());
+    if(req.isAuthenticated()) return next();
+    res.status(400).json({message: 'Please login'});
+}
+
+module.exports = {loadPassport, checkAuthentication};
