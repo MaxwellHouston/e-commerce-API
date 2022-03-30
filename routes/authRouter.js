@@ -5,9 +5,12 @@ const { hashPassword, verifyPassword } = require('../functions_schemas/validateF
 
 const { validate, ValidationError } = require('express-validation');
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
+
 
 const userInstance = new Usermodel();
 const authRouter = require('express').Router();
+
 
 
 //Autherization Routes
@@ -32,10 +35,15 @@ authRouter.post('/register', validate(registerSchema), async (req, res) => {
         res.status(400).send(err);
     }
     
-})
+});
 
-authRouter.post('/login', validate(loginSchema), async (req, res) => {
-    let data = req.body;
+authRouter.post('/login', validate(loginSchema), passport.authenticate('local', {failureFlash: true}), (req, res) => {
+    const user = req.user;
+    console.log(user);
+    res.json({message: `${user.first_name} is logged in`});
+
+
+    /*let data = req.body;
 
     //Check for user
     let user = await userInstance.getByEmail(data.email);
@@ -48,9 +56,9 @@ authRouter.post('/login', validate(loginSchema), async (req, res) => {
     //Assign token
     const token = jwt.sign({email: data.email, id: user.id}, token_secret);
 
-    res.header('login_token', token).send('Login successful');
+    res.header('login_token', token).send('Login successful');*/
 
-})
+});
 
 //Catch validation errors
 authRouter.use((err, req, res, next) => {
