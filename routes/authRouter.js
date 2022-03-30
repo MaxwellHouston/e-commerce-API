@@ -20,7 +20,6 @@ authRouter.post('/register', validate(registerSchema), async (req, res) => {
        return res.status(400).send('Email already in use');
     }
     //Hash password
-
     const hashedPassword = await hashPassword(data.password);
     data.password = hashedPassword;
         
@@ -39,6 +38,11 @@ authRouter.post('/login', validate(loginSchema), passport.authenticate('local', 
     console.log(user);
     res.json({message: `${user.first_name} is logged in`});
 });
+
+authRouter.get('/logout', (req, res) => {
+    req.logout();
+    res.json({message: 'User logged out'});
+})
 
 //Catch validation errors
 authRouter.use((err, req, res, next) => {

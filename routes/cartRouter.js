@@ -60,7 +60,7 @@ cartRouter.delete('/:id', async (req, res) => {
 })
 
 //Checkout
-cartRouter.post('/:id/checkout', async (req, res) => {
+cartRouter.get('/:id/checkout', async (req, res) => {
     try {
         const result = await cartInstance.checkout({user_id: req.user.id, cart_id: req.cart.id});
         if(result === 'empty') return res.status(400).send('Cart empty. No order created');
