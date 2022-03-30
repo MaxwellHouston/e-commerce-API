@@ -16,7 +16,8 @@ const authRouter = require('express').Router();
 //Autherization Routes
 
 authRouter.post('/register', validate(registerSchema), async (req, res) => {
-    let data = req.body
+    if(req.user) return res.status(400).json({message: 'Please log out to create a new user.'});
+    let data = req.body;
     //Check if email exists   
     let userCheck = await userInstance.getByEmail(data.email);
     if(userCheck){

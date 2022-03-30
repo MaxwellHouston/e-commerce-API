@@ -2,11 +2,12 @@ const cartRouter = require('express').Router();
 const { verifyTokenId } = require('../functions_schemas/validateFunctions');
 const Cartmodel = require('../models/CartModel');
 const productCartRouter = require('./productCartRouter');
+const { checkAuthentication } = require('../passportConfig');
 
 const cartInstance = new Cartmodel();
 
 //Login token check Middleware
-cartRouter.use('/', async (req, res, next) => {
+/*cartRouter.use('/', async (req, res, next) => {
     try {
         const id = await verifyTokenId(req.headers.login_token);
         req.userId = id;
@@ -14,14 +15,14 @@ cartRouter.use('/', async (req, res, next) => {
     } catch(err) {
         res.status(400).send('Invalid login_token');
     }
-})
+})*/
 
 //Id check middleware
-cartRouter.use('/:id', async (req, res, next) => {
+cartRouter.use('/:id', checkAuthentication, async (req, res, next) => {
     try{
         const cart = await cartInstance.getCartById(req.params.id);
         if(!cart) return res.status(400).send('No cart found');
-        if(cart.user_id !== req.userId) return res.status(400).send('No cart found');
+        if(cart.user_id !== req.user.id) return res.status(400).send('No cart found');
         req.cart = cart;
         next();
     } catch(err) {
@@ -34,9 +35,9 @@ cartRouter.use('/:id/items', productCartRouter);
 
 
 // Get all carts for user_id
-cartRouter.get('/', async (req, res) => {
+cartRouter.get('/', checkAuthentication, async (req, res) => {
     try {
-        const userCarts = await cartInstance.getCartsByUserId(req.userId);
+        const userCarts = await cartInstance.getCartsByUserId(req.user.id);
         if(userCarts.length === 0) return res.status(400).send('No carts found');
         res.json(userCarts);
     } catch(err) {
@@ -50,9 +51,9 @@ cartRouter.get('/:id', (req, res) => {
 })
 
 //Create new cart
-cartRouter.post('/', async (req, res) => {
+cartRouter.post('/', checkAuthentication, async (req, res) => {
     try{
-        const newCart = await cartInstance.create(req.userId);
+        const newCart = await cartInstance.create(req.user.id);
         if(!newCart) return res.status(400).send('Invalid user_id');
         res.status(201).send('Cart created');
     } catch(err) {
@@ -73,7 +74,7 @@ cartRouter.delete('/:id', async (req, res) => {
 //Checkout
 cartRouter.post('/:id/checkout', async (req, res) => {
     try {
-        const result = await cartInstance.checkout({user_id: req.userId, cart_id: req.cart.id});
+        const result = await cartInstance.checkout({user_id: req.user.id, cart_id: req.cart.id});
         if(result === 'empty') return res.status(400).send('Cart empty. No order created');
         if(result === 'payment') return res.status(400).send('Payment not processed');
         res.json({"order_id": result});
