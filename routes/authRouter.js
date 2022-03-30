@@ -1,12 +1,8 @@
 const Usermodel = require('../models/UserModel');
 const { registerSchema, loginSchema } = require('../functions_schemas/validateSchemas');
-const { token_secret } = require('../config');
-const { hashPassword, verifyPassword } = require('../functions_schemas/validateFunctions');
-
+const { hashPassword } = require('../functions_schemas/validateFunctions');
 const { validate, ValidationError } = require('express-validation');
-const jwt = require('jsonwebtoken');
 const passport = require('passport');
-
 
 const userInstance = new Usermodel();
 const authRouter = require('express').Router();
@@ -42,23 +38,6 @@ authRouter.post('/login', validate(loginSchema), passport.authenticate('local', 
     const user = req.user;
     console.log(user);
     res.json({message: `${user.first_name} is logged in`});
-
-
-    /*let data = req.body;
-
-    //Check for user
-    let user = await userInstance.getByEmail(data.email);
-    if(!user) return res.status(400).send('Email/Password not found');
-
-    //Validate password
-    const validPassword = await verifyPassword(data.password, user.password);
-    if(!validPassword) return res.status(400).send('Email/Password not found');
-    
-    //Assign token
-    const token = jwt.sign({email: data.email, id: user.id}, token_secret);
-
-    res.header('login_token', token).send('Login successful');*/
-
 });
 
 //Catch validation errors

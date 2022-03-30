@@ -1,26 +1,14 @@
 const orderRouter = require('express').Router();
 const Ordermodel = require('../models/OrderModel');
-const { verifyTokenId } = require('../functions_schemas/validateFunctions');
-
+const { checkAuthentication } = require('../passportConfig');
 const orderInstance = new Ordermodel();
 
-//Validate token
-orderRouter.use('/', async (req, res, next) => {
-    try {
-        const id = await verifyTokenId(req.headers.login_token);
-        req.userId = id;
-        next();
-    } catch(err) {
-        res.status(400).send('Invalid login_token');
-    }
-})
-
 //Check order id
-orderRouter.use('/:id', async (req, res, next) => {
+orderRouter.use('/:id', checkAuthentication, async (req, res, next) => {
     try{
         const order = await orderInstance.getOrderById(req.params.id);
         if(!order) return res.status(400).send('No order found');
-        if(order.user_id !== req.userId) return res.status(400).send('No order found');
+        if(order.user_id !== req.user.id) return res.status(400).send('No order found');
         req.order = order;
         next();
     } catch(err) {
@@ -29,9 +17,9 @@ orderRouter.use('/:id', async (req, res, next) => {
 })
 
 //Get all orders
-orderRouter.get('/', async (req, res) => {
+orderRouter.get('/', checkAuthentication, async (req, res) => {
     try {
-        const result = await orderInstance.getAllOrders(req.userId);
+        const result = await orderInstance.getAllOrders(req.user.id);
         if(result.length === 0) return res.status(400).send('No orders found');
         res.json(result);
     } catch (err) {

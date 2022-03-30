@@ -3,22 +3,10 @@ const { validate, ValidationError } = require('express-validation');
 
 const UserModel = require('../models/UserModel');
 const { updateSchema } = require('../functions_schemas/validateSchemas');
-const { hashPassword, verifyTokenEmail } = require('../functions_schemas/validateFunctions');
+const { hashPassword } = require('../functions_schemas/validateFunctions');
 const { checkAuthentication } = require('../passportConfig');
 
 const userInstance = new UserModel();
-
-
-//Token Middleware
-/*userRouter.use(async (req, res, next) => {
-    try{
-        const email = await verifyTokenEmail(req.headers.login_token);
-        req.email = email;
-        next();
-        } catch(err) {
-            res.status(400).send('Invalid login_token');
-        };        
-})*/
 
 // Input validation
 userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
@@ -30,8 +18,6 @@ userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
 // Routes
 userRouter.get('/', checkAuthentication, async (req, res) => {
     try {
-        //const user = await userInstance.getByEmail(req.email);
-        //user.password = '********';
         res.send(req.user);
     } catch(err) {
         res.status(400).send(err);
