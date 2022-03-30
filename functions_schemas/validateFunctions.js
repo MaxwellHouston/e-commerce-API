@@ -1,9 +1,4 @@
 const bcrypt = require("bcryptjs");
-const { verify } = require("jsonwebtoken");
-const { token_secret } = require("../config");
-const Usermodel = require("../models/UserModel");
-
-const userInstance = new Usermodel();
 
 
 module.exports = {
@@ -13,29 +8,6 @@ module.exports = {
         const hashedPassword = await bcrypt.hash(password, salt);
         return hashedPassword;
         },
-
-    async verifyPassword(password, input) {
-        const checkedPassword = await bcrypt.compare(password, input);
-        return checkedPassword;
-    },
-
-    async verifyTokenEmail(token) {
-            const email = verify(token, token_secret).email;
-            const emailCheck = await userInstance.getByEmail(email);
-            if(!emailCheck){
-                throw new Error('Invalid login_token');
-            }
-            return email;
-    },
-
-    async verifyTokenId(token) {
-        const id = verify(token, token_secret).id;
-        const idCheck = await userInstance.getById(id);
-        if(!idCheck){
-            throw new Error('Invalid login_token');
-        }
-        return id;
-    },
 
     async validateCard(data) {
         

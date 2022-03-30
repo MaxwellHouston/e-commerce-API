@@ -3,22 +3,10 @@ const { validate, ValidationError } = require('express-validation');
 
 const UserModel = require('../models/UserModel');
 const { updateSchema } = require('../functions_schemas/validateSchemas');
-const { hashPassword, verifyTokenEmail } = require('../functions_schemas/validateFunctions');
-
+const { hashPassword } = require('../functions_schemas/validateFunctions');
+const { checkAuthentication } = require('../passportConfig');
 
 const userInstance = new UserModel();
-
-
-//Token Middleware
-userRouter.use(async (req, res, next) => {
-    try{
-        const email = await verifyTokenEmail(req.headers.login_token);
-        req.email = email;
-        next();
-        } catch(err) {
-            res.status(400).send('Invalid login_token');
-        };        
-})
 
 // Input validation
 userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
@@ -28,22 +16,20 @@ userRouter.use('/', validate(updateSchema), (err, req, res, next) => {
 
 
 // Routes
-userRouter.get('/', async (req, res) => {
+userRouter.get('/', checkAuthentication, async (req, res) => {
     try {
-        const user = await userInstance.getByEmail(req.email);
-        user.password = '********';
-        res.send(user);
+        res.send(req.user);
     } catch(err) {
         res.status(400).send(err);
     }
 });
 
-userRouter.put('/', async (req, res) => {
+userRouter.put('/', checkAuthentication, async (req, res) => {
     const data = req.body;
 
     for(const key in data){
         try{
-            let input = {column: key, value: data[key], email: req.email};
+            let input = {column: key, value: data[key], email: req.user.email};
             if(key === 'password'){
                 let hashedPassword = await hashPassword(input.value);
                 input.value = hashedPassword;
@@ -56,9 +42,9 @@ userRouter.put('/', async (req, res) => {
     res.send('Update successful, remember to login again if email changed');
 });
 
-userRouter.delete('/', async (req, res) => {
+userRouter.delete('/', checkAuthentication, async (req, res) => {
     try {
-        await userInstance.deleteByEmail(req.email);
+        await userInstance.deleteByEmail(req.user.email);
     } catch(err) {
         res.status(400).send(err)
     }

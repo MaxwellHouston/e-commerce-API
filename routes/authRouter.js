@@ -1,26 +1,25 @@
 const Usermodel = require('../models/UserModel');
 const { registerSchema, loginSchema } = require('../functions_schemas/validateSchemas');
-const { token_secret } = require('../config');
-const { hashPassword, verifyPassword } = require('../functions_schemas/validateFunctions');
-
+const { hashPassword } = require('../functions_schemas/validateFunctions');
 const { validate, ValidationError } = require('express-validation');
-const jwt = require('jsonwebtoken');
+const passport = require('passport');
 
 const userInstance = new Usermodel();
 const authRouter = require('express').Router();
 
 
+
 //Autherization Routes
 
 authRouter.post('/register', validate(registerSchema), async (req, res) => {
-    let data = req.body
+    if(req.user) return res.status(400).json({message: 'Please log out to create a new user.'});
+    let data = req.body;
     //Check if email exists   
     let userCheck = await userInstance.getByEmail(data.email);
     if(userCheck){
        return res.status(400).send('Email already in use');
     }
     //Hash password
-
     const hashedPassword = await hashPassword(data.password);
     data.password = hashedPassword;
         
@@ -32,24 +31,17 @@ authRouter.post('/register', validate(registerSchema), async (req, res) => {
         res.status(400).send(err);
     }
     
-})
+});
 
-authRouter.post('/login', validate(loginSchema), async (req, res) => {
-    let data = req.body;
+authRouter.post('/login', validate(loginSchema), passport.authenticate('local', {failureFlash: true}), (req, res) => {
+    const user = req.user;
+    console.log(user);
+    res.json({message: `${user.first_name} is logged in`});
+});
 
-    //Check for user
-    let user = await userInstance.getByEmail(data.email);
-    if(!user) return res.status(400).send('Email/Password not found');
-
-    //Validate password
-    const validPassword = await verifyPassword(data.password, user.password);
-    if(!validPassword) return res.status(400).send('Email/Password not found');
-    
-    //Assign token
-    const token = jwt.sign({email: data.email, id: user.id}, token_secret);
-
-    res.header('login_token', token).send('Login successful');
-
+authRouter.get('/logout', (req, res) => {
+    req.logout();
+    res.json({message: 'User logged out'});
 })
 
 //Catch validation errors

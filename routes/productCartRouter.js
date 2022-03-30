@@ -12,7 +12,6 @@ productCartRouter.post('/', validate(productInputSchema), async (req, res) => {
         product_id: req.body.product_id,
         qty: req.body.qty
     }
-
      try {
          await cartInstance.addProduct(data);
          res.send('Product added')
