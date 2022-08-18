@@ -42,10 +42,4 @@ productRouter.get('/categories/:category', async (req, res) => {
     }
 })
 
-//Test Heroku
-
-productRouter.get('/test/test/test', (req, res) => {
-    res.json({message: 'This is a test'})
-})
-
 module.exports = productRouter;
